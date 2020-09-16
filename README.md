@@ -1,22 +1,40 @@
-# OmniVision ov5693
+# Surface Cam
 
-Experimental driver for Surface Book 2.
+## Installation
 
-## Install
+1. Apply patches from `patches/` to kernel tree (`git am <patch>`).
 
-Make sure you have a linux kernel somwhere. Then run
+2. Set `CONFIG_INIT_STACK_NONE` to `no automatic initialization (weakest)` (only arch distros)
+
+3. Set `VIDEO_ATOMISP_OV5693` to `n`
+
+4. Boot into new kernel
+
+5. Load camera driver for ov5693
 
 ```
+cd ov5693/
 make
-insmod ov5693.ko
+sudo insmod ov5693.ko
 ```
 
-## Debug
-
-Enable debugging with the following command
+6. Load cio2-bridge
 
 ```
-echo 'module ov5693 +p' > /sys/kernel/debug/dynamic_debug/control
+cd cio2-bridge
+make
+sudo insmod cio2-bridge.ko
 ```
 
-Check `dmesg` for debug output.
+7. Test camera
+
+```
+sudo cam -l
+sudo qcam
+```
+
+## References
+
+- https://github.com/jhand2/surface-camera
+- https://github.com/kitakar5525/surface-ipu3-cameras
+- https://github.com/djrscally/miix-510-cameras
