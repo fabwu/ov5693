@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: GPL-2.0 */
+/* Copyright (c) 2019 Intel Corporation. */
+
 #ifndef __DRIVERS_MEDIA_I2C_OV5693_H__
 #define __DRIVERS_MEDIA_I2C_OV5693_H__
 
@@ -66,9 +69,9 @@
 /*Bit[7:4] Group control, Bit[3:0] Group ID*/
 #define OV5693_GROUP_ACCESS			0x3208
 /*
-*Bit[3:0] Bit[19:16] of exposure,
-*remaining 16 bits lies in Reg0x3501&Reg0x3502
-*/
+ * Bit[3:0] Bit[19:16] of exposure,
+ * remaining 16 bits lies in Reg0x3501&Reg0x3502
+ */
 #define OV5693_EXPOSURE_H			0x3500
 #define OV5693_EXPOSURE_M			0x3501
 #define OV5693_EXPOSURE_L			0x3502
@@ -115,7 +118,7 @@
 #define OV5693_OTP_START_ADDR		0x3D00
 #define OV5693_OTP_END_ADDR		0x3D0F
 #define OV5693_OTP_DATA_SIZE		320
-#define OV5693_OTP_PROGRAM_REG      	0x3D80
+#define OV5693_OTP_PROGRAM_REG  0x3D80
 #define OV5693_OTP_READ_REG		0x3D81	// 1:Enable 0:disable
 #define OV5693_OTP_BANK_REG		0x3D84	//otp bank and mode
 #define OV5693_OTP_READY_REG_DONE	1
@@ -515,8 +518,8 @@ static struct ov5693_reg const ov5693_654x496[] = {
 
 /*
  * 1296x976 30fps 17ms VBlanking 2lane 10Bit (Scaling)
-*DS from 2592x1952
-*/
+ * DS from 2592x1952
+ */
 static struct ov5693_reg const ov5693_1296x976[] = {
 	{OV5693_8BIT, 0x3501, 0x7b},
 	{OV5693_8BIT, 0x3502, 0x00},
@@ -676,34 +679,6 @@ static struct ov5693_reg const ov5693_736x496[] = {
 	{OV5693_TOK_TERM, 0, 0}
 };
 
-/*
-static struct ov5693_reg const ov5693_736x496[] = {
-	{OV5693_8BIT, 0x3501, 0x7b},
-	{OV5693_8BIT, 0x3502, 0x00},
-	{OV5693_8BIT, 0x3708, 0xe6},
-	{OV5693_8BIT, 0x3709, 0xc3},
-	{OV5693_8BIT, 0x3803, 0x00},
-	{OV5693_8BIT, 0x3806, 0x07},
-	{OV5693_8BIT, 0x3807, 0xa3},
-	{OV5693_8BIT, 0x3808, 0x02},
-	{OV5693_8BIT, 0x3809, 0xe0},
-	{OV5693_8BIT, 0x380a, 0x01},
-	{OV5693_8BIT, 0x380b, 0xf0},
-	{OV5693_8BIT, 0x380c, 0x0d},
-	{OV5693_8BIT, 0x380d, 0xb0},
-	{OV5693_8BIT, 0x380e, 0x05},
-	{OV5693_8BIT, 0x380f, 0xf2},
-	{OV5693_8BIT, 0x3811, 0x08},
-	{OV5693_8BIT, 0x3813, 0x02},
-	{OV5693_8BIT, 0x3814, 0x31},
-	{OV5693_8BIT, 0x3815, 0x31},
-	{OV5693_8BIT, 0x3820, 0x01},
-	{OV5693_8BIT, 0x3821, 0x1f},
-	{OV5693_8BIT, 0x5002, 0x00},
-	{OV5693_8BIT, 0x0100, 0x01},
-	{OV5693_TOK_TERM, 0, 0}
-};
-*/
 /*
  * 976x556 30fps 8.8ms VBlanking 2lane 10Bit (Scaling)
  */
@@ -1351,4 +1326,11 @@ struct ov5693_resolution ov5693_res_video[] = {
 static struct ov5693_resolution *ov5693_res = ov5693_res_video;
 static unsigned long N_RES = N_RES_VIDEO;
 
-#endif // __DRIVERS_MEDIA_I2C_OV5693_H__ 
+#define OV5693_LINK_FREQ_19MHZ		19200000
+#define OV5693_PIXEL_RATE			((OV5693_LINK_FREQ_19MHZ * 2 * 2) / 10)
+
+static const s64 link_freq_menu_items[] = {
+	OV5693_LINK_FREQ_19MHZ
+};
+
+#endif // __DRIVERS_MEDIA_I2C_OV5693_H__

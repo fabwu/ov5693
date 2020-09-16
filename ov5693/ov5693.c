@@ -41,7 +41,7 @@ static int ov5693_read_reg(struct i2c_client *client,
 		return -EINVAL;
 	}
 
-	memset(msg, 0 , sizeof(msg));
+	memset(msg, 0, sizeof(msg));
 
 	msg[0].addr = client->addr;
 	msg[0].flags = 0;
@@ -206,6 +206,7 @@ static int ov5693_get_fmt(struct v4l2_subdev *sd,
 			  struct v4l2_subdev_format *format)
 {
 	struct ov5693_device *dev = to_ov5693_sensor(sd);
+
 	if (format->pad)
 		return -EINVAL;
 
@@ -264,8 +265,7 @@ static int ov5693_stop_streaming(struct ov5693_device *dev)
 
 	ret = ov5693_write_reg(client, OV5693_8BIT, OV5693_SW_STREAM,
 				OV5693_STOP_STREAMING);
-	if (ret)
-	{
+	if (ret) {
 		dev_err(&client->dev, "Failed to stop stream\n");
 		return ret;
 	}
@@ -284,7 +284,7 @@ static int ov5693_start_streaming(struct ov5693_device *dev)
 	if (ret) {
 		dev_err(&client->dev, "Failed to set powerup registers\n");
 		return ret;
-	}	
+	}
 
 	ret = ov5693_write_reg_array(client, ov5693_global_setting);
 	if (ret) {
@@ -456,14 +456,14 @@ static int __ov5693_power_on(struct ov5693_device *ov5693)
 	// TODO: Refactor this into own function
 	// Get dependant INT3472 device
 	if (!acpi_has_method(dev_handle, "_DEP")) {
-		printk("No dependant devices\n");
-		return -100;
+		dev_err(&client->dev, "No dependant devices\n");
+		return -ENODEV;
 	}
 
 	status = acpi_evaluate_reference(dev_handle, "_DEP", NULL,
 					 &dep_devices);
 	if (ACPI_FAILURE(status)) {
-		printk("Failed to evaluate _DEP.\n");
+		dev_err(&client->dev, "Failed to evaluate _DEP.\n");
 		return -ENODEV;
 	}
 
@@ -473,7 +473,7 @@ static int __ov5693_power_on(struct ov5693_device *ov5693)
 
 		status = acpi_get_object_info(dep_devices.handles[i], &info);
 		if (ACPI_FAILURE(status)) {
-			printk("Error reading _DEP device info\n");
+			dev_err(&client->dev, "Error reading _DEP device info\n");
 			return -ENODEV;
 		}
 
@@ -494,19 +494,19 @@ static int __ov5693_power_on(struct ov5693_device *ov5693)
 
 	ov5693->xshutdn = gpiod_get_index(dev, NULL, 0, GPIOD_ASIS);
 	if (IS_ERR(ov5693->xshutdn)) {
-		printk("Couldn't get GPIO XSHUTDN\n");
+		dev_err(dev, "Couldn't get GPIO XSHUTDN\n");
 		return -EINVAL;
 	}
 
 	ov5693->pwdnb = gpiod_get_index(dev, NULL, 1, GPIOD_ASIS);
 	if (IS_ERR(ov5693->pwdnb)) {
-		printk("Couldn't get GPIO PWDNB\n");
+		dev_err(dev, "Couldn't get GPIO PWDNB\n");
 		return -EINVAL;
 	}
 
 	ov5693->led_gpio = gpiod_get_index(dev, NULL, 2, GPIOD_ASIS);
 	if (IS_ERR(ov5693->led_gpio)) {
-		printk("Couldn't get GPIO 2\n");
+		dev_err(dev, "Couldn't get GPIO 2\n");
 		return -EINVAL;
 	}
 
@@ -535,7 +535,7 @@ static int __ov5693_power_on(struct ov5693_device *ov5693)
 
 	// TODO: I don't know if this is actually needed
 	usleep_range(10000, 11000);
-	
+
 	return 0;
 }
 
@@ -543,7 +543,6 @@ static int ov5693_remove(struct i2c_client *client)
 {
 	struct v4l2_subdev *sd = i2c_get_clientdata(client);
 	struct ov5693_device *dev = to_ov5693_sensor(sd);
-	dev_dbg(&client->dev, "ov5693_remove...\n");
 
 	pm_runtime_disable(&client->dev);
 
@@ -557,13 +556,6 @@ static int ov5693_remove(struct i2c_client *client)
 
 	return 0;
 }
-
-// TODO: Put these in header?
-#define OV5693_LINK_FREQ_19MHZ		19200000
-#define OV5693_PIXEL_RATE			(OV5693_LINK_FREQ_19MHZ * 2 * 2) / 10
-static const s64 link_freq_menu_items[] = {
-	OV5693_LINK_FREQ_19MHZ
-};
 
 /**
  * Initialize controls:
@@ -635,7 +627,6 @@ static int ov5693_probe(struct i2c_client *client,
 
 	dev = kzalloc(sizeof(*dev), GFP_KERNEL);
 	if (!dev) {
-		dev_err(&client->dev, "out of memory\n");
 		ret = -ENOMEM;
 		goto out;
 	}
@@ -653,14 +644,13 @@ static int ov5693_probe(struct i2c_client *client,
 
 	ret = ov5693_configure_regulators(dev);
 	if (ret) {
-		dev_err(&client->dev, "Failed to get power regulators\n");
+		dev_err(&client->dev, "failed to get power regulators\n");
 		return ret;
 	}
 
 	// Power on
 	ret = __ov5693_power_on(dev);
-	if (ret)
-	{
+	if (ret) {
 		dev_err(&client->dev, "could not power on ov5693\n");
 		goto out;
 	}
