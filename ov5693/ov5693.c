@@ -8,6 +8,7 @@
 #include <linux/i2c.h>
 #include <linux/module.h>
 #include <linux/pm_runtime.h>
+#include <linux/pci.h>
 #include <linux/platform_device.h>
 #include <linux/regulator/consumer.h>
 #include <media/v4l2-ctrls.h>
@@ -550,7 +551,9 @@ static int ov5693_remove(struct i2c_client *client)
 
 	v4l2_async_unregister_subdev(sd);
 
-	media_entity_cleanup(&dev->sd.entity);
+    device_link_remove(&client->dev, &dev->cio2_dev->dev);
+
+    media_entity_cleanup(&dev->sd.entity);
 	v4l2_ctrl_handler_free(&dev->ctrl_handler);
 	kfree(dev);
 
@@ -623,11 +626,24 @@ static int ov5693_probe(struct i2c_client *client,
 			const struct i2c_device_id *id)
 {
 	struct ov5693_device *dev;
+    struct device_link *dl;
 	int ret = 0;
 
 	dev = kzalloc(sizeof(*dev), GFP_KERNEL);
 	if (!dev) {
 		ret = -ENOMEM;
+		goto out;
+	}
+
+	dev->cio2_dev = pci_get_device(PCI_VENDOR_ID_INTEL, CIO2_PCI_ID, NULL);
+    if (!dev->cio2_dev) {
+        ret = -ENODEV;
+        goto out;
+    }
+
+	dl = device_link_add(&client->dev, &dev->cio2_dev->dev, DL_FLAG_STATELESS);
+	if (!dl) {
+		ret = -ENODEV;
 		goto out;
 	}
 

@@ -6,6 +6,8 @@
 
 #define OV5693_NAME		"ov5693"
 
+#define CIO2_PCI_ID     0x9d32
+
 #define OV5693_POWER_UP_RETRY_NUM 5
 
 /* Defines for register writes and register array processing */
@@ -173,6 +175,7 @@ enum vcm_type {
  */
 struct ov5693_device {
 	struct v4l2_subdev sd;
+    struct pci_dev *cio2_dev;
 	struct media_pad pad;
 	struct v4l2_mbus_framefmt format;
 	struct mutex input_lock;
