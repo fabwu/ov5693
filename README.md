@@ -1,5 +1,12 @@
 # Surface Cam
 
+## libcamera
+
+Try to get param video node working:
+
+https://linuxtv.org/downloads/v4l-dvb-apis-new/userspace-api/v4l/dev-meta.html#metadata
+https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/pixfmt-meta-intel-ipu3.html#v4l2-meta-fmt-params
+
 ## Installation
 
 1. Apply patches from `patches/` to kernel tree (`git am <patch>`).
